@@ -375,21 +375,21 @@ export class OAuth2Client {
    */
   tokenResponseToOAuth2Token(resp: Promise<TokenResponse>): Promise<OAuth2Token> {
     return resp.then(body => {
-      const extraParams = filterObjectByKeys(body, this.settings.extraParams)
+      const extraParams = filterObjectByKeys(body, this.settings.extraParams || [])
       return {
         accessToken: body.access_token,
         expiresAt: body.expires_in ? Date.now() + (body.expires_in * 1000) : null,
         refreshToken: body.refresh_token ?? null,
-        ...extraParams
+        extraParams,
       }
     });
   }
 }
 
-function filterObjectByKeys(obj: Record<string, any>, whitelistedKeys: string[]) {
+function filterObjectByKeys(obj: Record<string, any>, whitelistedKeys: string[]): Record<string, any> {
     return Object.keys(obj)
         .filter(key => whitelistedKeys.includes(key))
-        .reduce((result, key) => {
+        .reduce((result: Record<string, any>, key: string) => {
             result[key] = obj[key];
             return result;
         }, {});
